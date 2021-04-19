@@ -5,7 +5,7 @@
 // ==UserScript==
 // @name         Disable Closeable PRs
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  Prompts before merging a green build.
 // @author       Midhun Krishna
 // @include      /^https:\/\/github.com\/.+\/pull\/\d+/
@@ -30,18 +30,24 @@ var showCheckboxes = function () {
   jQuery(branchItem).insertBefore('.merge-message');
 };
 
+var showStepCompleted = function () {
+  var completedStep = '<div class="branch-action-item" id="branch-item-duplicate-complete"> <div class="merging-body squashing-body"> <div class="branch-action-item-icon completeness-indicator completeness-indicator-success"> <svg class="octicon octicon-check" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg> </div> <h3 class="h4 status-heading">Merging is now enabled</h3> <div class="review-status-item d-flex flex-justify-between"> <div class="merge-status-icon"> <svg class="octicon octicon-check mx-auto d-block color-text-success" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg> </div> <div class="color-text-secondary mr-3 flex-auto flex-self-start"> <strong class="text-emphasized"> Ticket is DONE by following feature branches </strong> </div> </div> <div class="review-status-item d-flex flex-justify-between"> <div class="merge-status-icon"> <svg class="octicon octicon-check mx-auto d-block color-text-success" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg> </div> <div class="color-text-secondary mr-3 flex-auto flex-self-start"> <strong class="text-emphasized"> PR is rebased with develop </strong> </div> </div> </div> </div>'
+
+  jQuery(completedStep).insertBefore('.merge-message');
+}
+
+
 var clickHandler = function (checkBoxState, mergeButton, mergeDropDown, branchItemDuplicate, disabledMergeDropdown) {
   return function (e) {
     var checkBox = jQuery(e.currentTarget);
     var name = checkBox.prop('name');
-
-    checkBox.is(':checked') ? checkBoxState[name] = true : checkBoxState[name] = false;
-
+    checkBoxState[name] = checkBox.is(':checked')
     if(checkBoxState.ticketDone && checkBoxState.rebaseDone) {
       branchItemDuplicate.hide();
       mergeButton.prop('disabled', false).addClass('btn-primary');
       mergeDropDown.show();
       disabledMergeDropdown.hide();
+      showStepCompleted();
     }
   };
 };
