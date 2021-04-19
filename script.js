@@ -1,27 +1,72 @@
+// ==JsHint==
+/* globals jQuery, $, waitForKeyElements */
+// ==/JsHint==
+
 // ==UserScript==
 // @name         Disable Closeable PRs
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  Prompts before merging a green build.
 // @author       Midhun Krishna
 // @include      /^https:\/\/github.com\/.+\/pull\/\d+/
 // @grant        none
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js#sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==
-// @run-at       document-end
+// @run-at       document-idle
+
 // ==/UserScript==
+
+var disableButtons = function (mergeButton, mergeDropDown, buttonGroup) {
+  mergeButton.prop('disabled', true).removeClass('btn-primary');
+  mergeDropDown.hide();
+  var disabledMergeDropDown = '<button id="disabled_merge_dropdown" type="button" class="btn select-menu-button BtnGroup-item" aria-label="Select merge method" disabled=""></button>';
+  buttonGroup.append(disabledMergeDropDown);
+};
+
+var showCheckboxes = function () {
+  var ticketDone = '<input type="checkbox" id="ticket_done" name="ticketDone" ><label for="ticket_done"> Following feature branches. Is the ticket done?</label><br>';
+  var rebaseDone = '<input type="checkbox" id="rebase_done" name="rebaseDone" ><label for="rebase_done"> Did you rebase this PR with develop?</label><br>';
+  var branchItem = '<div id="branch-item-duplicate" class="branch-action-item"><div class="branch-action-item-icon completeness-indicator completeness-indicator-error"><svg class="octicon octicon-x" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"></path></svg></div><div class="h4 status-heading color-text-danger">Merging is blocked</div><span class="status-meta">Merging can be enabled by checking the following:</span><br>' + ticketDone + rebaseDone + '</div>';
+
+  jQuery(branchItem).insertBefore('.merge-message');
+};
+
+var clickHandler = function (checkBoxState, mergeButton, mergeDropDown, branchItemDuplicate, disabledMergeDropdown) {
+  return function (e) {
+    var checkBox = jQuery(e.currentTarget);
+    var name = checkBox.prop('name');
+
+    checkBox.is(':checked') ? checkBoxState[name] = true : checkBoxState[name] = false;
+
+    if(checkBoxState.ticketDone && checkBoxState.rebaseDone) {
+      branchItemDuplicate.hide();
+      mergeButton.prop('disabled', false).addClass('btn-primary');
+      mergeDropDown.show();
+      disabledMergeDropdown.hide();
+    }
+  };
+};
 
 (function() {
   'use strict';
   jQuery.noConflict();
-  jQuery('.btn-group-merge').first().hide();
-  var btn = '<button type="button" class="btn-group-merge-duplicate rounded-left-1 btn btn-primary BtnGroup-item" aria-expanded="false" style="">Merge pull request</button>';
-  jQuery('.select-menu.d-inline-block .BtnGroup').first().prepend(jQuery.parseHTML(btn));
 
-  jQuery('.btn-group-merge-duplicate').on('click', function(e) {
-    if (confirm("Following feature branches. Is the ticket done?")) {
-      if (confirm("Have you rebased the branch from latest develop?")) {
-        jQuery('.btn-group-merge').first().click();
-      }
-    }
-  });
+  var mergeButton = jQuery('button:contains("Merge pull request")').first();
+  if(mergeButton.is(':enabled')) {
+    // disable buttons
+    var mergeDropDown = jQuery('.js-merge-box summary');
+    var buttonGroup = jQuery('.js-merge-box .BtnGroup');
+    disableButtons(mergeButton, mergeDropDown, buttonGroup);
+    // show checkboxes
+    showCheckboxes();
+
+    // state management
+    var checkBoxState = {ticketDone: false, rebaseDone: false};
+
+    // handle checkbox clicks
+    var branchItemDuplicate = jQuery('#branch-item-duplicate');
+    var disabledMergeDropdown = jQuery('#disabled_merge_dropdown');
+    var handler = clickHandler(checkBoxState, mergeButton, mergeDropDown, branchItemDuplicate, disabledMergeDropdown);
+    jQuery('#ticket_done').click(handler);
+    jQuery('#rebase_done').click(handler);
+}
 })();
