@@ -1,7 +1,6 @@
 ### Is Mergeable?
 
-This is a TamperMonkey user script that prompts when a user clicks 'Merge PR' green button.
-
+This is a TamperMonkey user script that marks a mergeable PR as 'Un Mergeable' until certain tasks are completed. 
 #### What is TamperMonkey
 
 TamperMonkey is a browser extension that runs user installed scripts.
