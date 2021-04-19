@@ -19,7 +19,9 @@
 
   jQuery('.btn-group-merge-duplicate').on('click', function(e) {
     if (confirm("Following feature branches. Is the ticket done?")) {
-      jQuery('.btn-group-merge').first().click();
+      if (confirm("Have you rebased the branch from latest develop?")) {
+        jQuery('.btn-group-merge').first().click();
+      }
     }
   });
 })();
