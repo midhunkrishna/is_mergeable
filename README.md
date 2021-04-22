@@ -9,6 +9,14 @@ TamperMonkey is a browser extension that runs user installed scripts.
 - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)
 - [Opera](https://addons.opera.com/en/extensions/details/tampermonkey-beta/)
 
+#### Installation
+- Install Tampermonkey
+- Select script.js in this repo. View the file and click the Raw button at the top of the file to view its source
+Copy the source
+- Open Tampermonkey in your browser and click the Add Script tab (icon with a plus symbol)
+- Paste the source into the script window and hit save
+- Voila!
+
 #### Resources
 
 - [TamperMonkey Documentation](https://www.tampermonkey.net/documentation.php)
