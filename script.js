@@ -5,7 +5,7 @@
 // ==UserScript==
 // @name         Disable Closeable PRs
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.4
 // @description  Prompts before merging a green build.
 // @author       Midhun Krishna
 // @include      /^https:\/\/github.com\/.+\/pull\/\d+/
