@@ -5,23 +5,28 @@
 // ==UserScript==
 // @name         Disable Closeable PRs
 // @namespace    http://tampermonkey.net/
-// @version      0.4
+// @version      0.3
 // @description  Prompts before merging a green build.
 // @author       Midhun Krishna
 // @include      /^https:\/\/github.com\/.+\/pull\/\d+/
-// @grant        none
+// @grant        window.onurlchange
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js#sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==
 // @run-at       document-idle
 
 // ==/UserScript==
 
-window.setInterval = window.setInterval.bind(window);
+window.clearTimeout = window.clearTimeout.bind(window);
 window.clearInterval = window.clearInterval.bind(window);
+window.setTimeout = window.setTimeout.bind(window);
+window.setInterval = window.setInterval.bind(window);
 
 var disableButtons = function (mergeButton, mergeDropDown, buttonGroup) {
+  console.debug('DCP: disabling mergeButton', mergeButton);
   mergeButton.prop('disabled', true).removeClass('btn-primary');
+  console.debug('DCP: Hiding mergeDropDown', mergeDropDown);
   mergeDropDown.hide();
   var disabledMergeDropDown = '<button id="disabled_merge_dropdown" type="button" class="btn select-menu-button BtnGroup-item" aria-label="Select merge method" disabled=""></button>';
+  console.debug('DCP: appending disabled dropdown to', buttonGroup);
   buttonGroup.append(disabledMergeDropDown);
 };
 
@@ -33,15 +38,16 @@ var showCheckboxes = function () {
 };
 
 var showStepCompleted = function () {
-  var completedStep = '<div class="branch-action-item" id="branch-item-duplicate-complete"> <div class="merging-body squashing-body"> <div class="branch-action-item-icon completeness-indicator completeness-indicator-success"> <svg class="octicon octicon-check" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg> </div> <h3 class="h4 status-heading">Merging is now enabled</h3> <div class="review-status-item d-flex flex-justify-between"> <div class="merge-status-icon"> <svg class="octicon octicon-check mx-auto d-block color-text-success" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg> </div> <div class="color-text-secondary mr-3 flex-auto flex-self-start"> <strong class="text-emphasized"> Ticket is DONE by following feature branches </strong> </div> </div> <div class="review-status-item d-flex flex-justify-between"> <div class="merge-status-icon"> <svg class="octicon octicon-check mx-auto d-block color-text-success" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg> </div> <div class="color-text-secondary mr-3 flex-auto flex-self-start"> <strong class="text-emphasized"> PR is rebased with develop </strong> </div> </div> </div> </div>';
+  var completedStep = '<div class="branch-action-item" id="branch-item-duplicate-complete"> <div class="merging-body squashing-body"> <div class="branch-action-item-icon completeness-indicator completeness-indicator-success"> <svg class="octicon octicon-check" height="16" viewBox="0 0 16 16" version="1.1" width="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg> </div> <h3 class="h4 status-heading">Merging is now enabled</h3> <div class="review-status-item d-flex flex-justify-between"> <div class="merge-status-icon"> <svg class="octicon octicon-check mx-auto d-block color-text-success" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg> </div> <div class="color-text-secondary mr-3 flex-auto flex-self-start"> <strong class="text-emphasized"> Ticket is DONE by following feature branches </strong> </div> </div> <div class="review-status-item d-flex flex-justify-between"> <div class="merge-status-icon"> <svg class="octicon octicon-check mx-auto d-block color-text-success" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"></path></svg> </div> <div class="color-text-secondary mr-3 flex-auto flex-self-start"> <strong class="text-emphasized"> PR is rebased with develop </strong> </div> </div> </div> </div>'
   jQuery(completedStep).insertBefore('.merge-message');
-};
+}
+
 
 var clickHandler = function (checkBoxState, mergeButton, mergeDropDown, branchItemDuplicate, disabledMergeDropdown) {
   return function (e) {
     var checkBox = jQuery(e.currentTarget);
     var name = checkBox.prop('name');
-    checkBoxState[name] = checkBox.is(':checked');
+    checkBoxState[name] = checkBox.is(':checked')
     if(checkBoxState.ticketDone && checkBoxState.rebaseDone) {
       branchItemDuplicate.hide();
       mergeButton.prop('disabled', false).addClass('btn-primary');
@@ -53,39 +59,63 @@ var clickHandler = function (checkBoxState, mergeButton, mergeDropDown, branchIt
 };
 
 var userScript = function (mergeButton) {
-  if(mergeButton.is(':enabled')) {
     // disable buttons
-    var mergeDropDown = jQuery('.js-merge-box summary');
-    var buttonGroup = jQuery('.js-merge-box .BtnGroup');
-    disableButtons(mergeButton, mergeDropDown, buttonGroup);
-    // show checkboxes
-    showCheckboxes();
+  var mergeDropDown = jQuery('.js-merge-box summary');
+  var buttonGroup = jQuery('.js-merge-box .BtnGroup');
+  disableButtons(mergeButton, mergeDropDown, buttonGroup);
+  // show checkboxes
+  showCheckboxes();
+  // state management
+  var checkBoxState = {ticketDone: false, rebaseDone: false};
+  // handle checkbox clicks
+  var branchItemDuplicate = jQuery('#branch-item-duplicate');
+  var disabledMergeDropdown = jQuery('#disabled_merge_dropdown');
+  var handler = clickHandler(checkBoxState, mergeButton, mergeDropDown, branchItemDuplicate, disabledMergeDropdown);
+  jQuery('#ticket_done').click(handler);
+  jQuery('#rebase_done').click(handler);
+};
 
-    // state management
-    var checkBoxState = {ticketDone: false, rebaseDone: false};
+window._intervals = [];
 
-    // handle checkbox clicks
-    var branchItemDuplicate = jQuery('#branch-item-duplicate');
-    var disabledMergeDropdown = jQuery('#disabled_merge_dropdown');
-    var handler = clickHandler(checkBoxState, mergeButton, mergeDropDown, branchItemDuplicate, disabledMergeDropdown);
-    jQuery('#ticket_done').click(handler);
-    jQuery('#rebase_done').click(handler);
-  }
+var clearIntervals = function() {
+  window._intervals.map(function(interval) {
+    console.debug('DCP: clearing interval', interval);
+    window.clearInterval(interval);
+  });
+  window._intervals = [];
+}
+
+var conditionalUserScript = function () {
+  var limit = 50, i = 0;
+  var mergeButton = undefined;
+  window._intervals.push(
+    window.setInterval(function() {
+      console.debug('DCP: Inside interval, looking for merge button');
+      mergeButton = jQuery('button:contains("Merge pull request")').first();
+
+      if (mergeButton.get(0) && mergeButton.is(':enabled')) {
+        console.debug('DCP: Actionable button found')
+        clearIntervals();
+        userScript(mergeButton);
+      } else if(mergeButton.is(':disabled')) {
+        console.debug('DCP: Button found, is disabled')
+      } else {
+        (i = i + 1) == limit ? clearIntervals() : null;
+      }
+    }, 250)
+  );
 };
 
 (function() {
   'use strict';
-  jQuery.noConflict();
-  var intervalLimit = 50, i = 0;
-  var mergeButton = undefined;
-
-  var interval = window.setInterval(function() {
-   mergeButton = jQuery('button:contains("Merge pull request")').first();
-   if (mergeButton.get(0)) {
-     window.clearInterval(interval);
-     userScript(mergeButton);
-   } else {
-     (i = i + 1) == intervalLimit ? window.clearInterval(interval) : null;
-   }
-  }, 100);
+  jQuery.noConflict(); window.jQuery = jQuery;
+  conditionalUserScript();
+  if (window.onurlchange === null) {
+    window.addEventListener('urlchange', function(info) {
+      // wait for button to be active
+      setTimeout(function() {
+       conditionalUserScript()
+      }, 1000);
+    });
+  }
 })();
